@@ -1,8 +1,24 @@
-# Smart Interview Preparation Mentor
+# 🤖 AI-Powered Personalized Interview Mentor
 
-A modern full-stack AI SaaS application for personalized interview preparation. It includes a React + Tailwind dashboard, FastAPI backend, JWT auth, resume parsing, RAG question retrieval, mock interview sessions, coding evaluation, analytics, recommendations, voice hooks, emotion hooks, Docker support, and a seed interview knowledge base.
+A modern full-stack AI SaaS platform that helps users prepare for technical, HR, and system design interviews using adaptive AI-driven mock sessions. The platform analyzes resumes, generates personalized questions, evaluates answers in real time, and provides performance analytics to improve interview readiness.
 
-## Architecture
+---
+
+## ✨ Features
+
+- **📄 Resume Parsing & Skill Extraction**: Upload PDF, DOCX, or TXT resumes to extract key skills and build tailored questions.
+- **🎯 Personalized AI Mock Interviews**: Dynamic chat-based sessions tailored to your target company, role, and skills.
+- **💼 Comprehensive Interview Rounds**: Covers HR behavioral questions, deep technical challenges, and system design.
+- **⚡ Real-Time Feedback & Scoring**: Automatic evaluation of replies with actionable scores and suggestions.
+- **🧠 RAG-Based Question Generation**: Context-aware retrieval of technical questions from a local seed knowledge base and chroma vector DB.
+- **📊 Performance Analytics Dashboard**: High-fidelity UI charting your progress, strengths, and areas for improvement.
+- **💻 Monaco Code Playground**: Write and run code solutions directly inside the browser with AI evaluation.
+- **🔐 JWT Authentication**: Secure register/login flow using JSON Web Tokens.
+- **☁️ Hybrid DB Integration**: Support for SQLite/PostgreSQL, optional MongoDB Atlas persistence, and ChromaDB vector search.
+
+---
+
+## 🏗️ Architecture
 
 ```text
 frontend/ React, TypeScript, Tailwind, Framer Motion, Recharts, Monaco
@@ -13,117 +29,134 @@ MongoDB   Optional Atlas persistence for resumes, sessions, chat, and feedback
 LLM       OpenAI when configured, deterministic local mentor fallback otherwise
 ```
 
-## Core API Routes
+The system follows a three-tier architecture:
+1. **Frontend Layer**: Handles interactive UI, coding environment, dashboards, and interview sessions.
+2. **Backend Layer**: Multi-route REST API, authentication, JWT tokens, resume processing, and AI connector.
+3. **Database & Vector DB Layer**: Persists local configurations, seeds, vectorized question indices, and session telemetry.
 
-- `POST /api/auth/demo` and `POST /api/auth/register`
-- `POST /api/resumes/analyze`
-- `POST /api/rag/search`
-- `POST /api/interviews/start`
-- `POST /api/interviews/{session_id}/answer`
-- `POST /api/coding/evaluate`
-- `GET /api/analytics/me`
-- `GET /api/recommendations/today`
-- `POST /api/voice/analyze`
-- `POST /api/emotion/analyze`
-- `GET /api/database/status`
+---
 
-## Database Schema
+## 🛠️ Tech Stack
 
-- `users`: auth profile, password hash, optional Google id
-- `resume_profiles`: uploaded resume text and extracted JSON analysis
-- `interview_sessions`: mode, company, topics, conversation history
-- `chat_messages`: stored chat turns for replay and summaries
-- `feedback_events`: score history for weak area analytics
+- **Frontend**: React, TypeScript, Vite, Tailwind CSS, Monaco Editor, Framer Motion, Recharts
+- **Backend**: FastAPI, Python, Uvicorn, SQLAlchemy
+- **AI & Vector Search**: OpenAI API, ChromaDB, Sentence Transformers, `pypdf`, `python-docx`
+- **Database**: SQLite (default local), MongoDB Atlas (optional cloud persistence)
 
-When `MONGODB_URI` is configured, the backend also writes these MongoDB Atlas collections in `smart_interview_ai`:
+---
 
-- `users`
-- `resume_profiles`
-- `interview_sessions`
-- `chat_messages`
-- `feedback_events`
+## 🔄 Workflow
 
-## Local Setup
+1. **User Registration & Login**: Authenticate securely to track your history.
+2. **Resume Upload**: Upload your professional profile.
+3. **AI Skill Analysis**: Extracted text compiles into a structured candidate profile.
+4. **Mock Interview Selection**: Select round types (Technical, HR, System Design) and company focus.
+5. **Interactive Evaluation**: Real-time adaptive AI follow-up questions and evaluation.
+6. **Analytics & Recommendations**: Receive feedback, study recommendations, and performance metrics.
 
-Backend:
+---
 
-```bash
-cd backend
-python -m venv .venv
-.venv\Scripts\activate
-copy .env.example .env
-pip install -r requirements.txt
-uvicorn app.main:app --reload
-```
+## 🚀 Local Setup
 
-## Connect MongoDB Atlas
+### ⚙️ Backend Setup
+1. Navigate to the backend directory:
+   ```bash
+   cd backend
+   ```
+2. Create and activate a Python virtual environment:
+   ```bash
+   python -m venv .venv
+   # On Windows:
+   .venv\Scripts\activate
+   # On Unix/macOS:
+   source .venv/bin/activate
+   ```
+3. Copy the environment template:
+   ```bash
+   copy .env.example .env
+   # Or on Unix: cp .env.example .env
+   ```
+4. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+5. Run the development server:
+   ```bash
+   uvicorn app.main:app --reload
+   ```
+   *API documentation will be available at `http://localhost:8000/docs`.*
 
-The MongoDB Cloud page URL is only the web console. The backend needs the Atlas driver connection string:
+### 💻 Frontend Setup
+1. Navigate to the frontend directory:
+   ```bash
+   cd frontend
+   ```
+2. Install Node packages:
+   ```bash
+   npm install
+   ```
+3. Run the development server:
+   ```bash
+   npm run dev
+   ```
+   *Open `http://localhost:5173` in your browser.*
+
+---
+
+## 🔑 Environment Variables & AI Configuration
+
+By default, the backend runs with `LLM_PROVIDER=local` which returns deterministic mentor responses (ideal for testing without a paid OpenAI subscription).
+
+To enable OpenAI integration and MongoDB Atlas cloud storage, update the variables inside your `backend/.env` file:
 
 ```env
+# AI Config
+LLM_PROVIDER=openai
+OPENAI_API_KEY=your_openai_api_key
+
+# MongoDB Cloud Database (Optional)
 MONGODB_URI=mongodb+srv://<username>:<password>@<cluster-host>/smart_interview_ai?retryWrites=true&w=majority
 MONGODB_DB=smart_interview_ai
 ```
 
-In Atlas, open **Database > Connect > Drivers**, copy the Python connection string, replace `<password>`, and paste it into `backend/.env`.
-
-Then verify:
-
+Verify your database status using:
 ```bash
 curl http://localhost:8000/api/database/status
 ```
 
-You should see `"enabled": true`.
+---
 
-Frontend:
+## 🐳 Docker Setup
 
-```bash
-cd frontend
-npm install
-npm run dev
-```
+You can run the entire stack (Frontend + Backend + DB) containerized:
 
-Open `http://localhost:5173`. API docs are at `http://localhost:8000/docs`.
+1. Copy the backend template env to the final backend env:
+   ```bash
+   copy backend\.env.example backend\.env
+   ```
+2. Launch Docker compose:
+   ```bash
+   docker compose up --build
+   ```
+3. Access:
+   - Frontend: `http://localhost:5173`
+   - Backend Docs: `http://localhost:8000/docs`
 
-## Docker Setup
+---
 
-```bash
-copy backend\.env.example backend\.env
-docker compose up --build
-```
+## 🧠 RAG Pipeline & Knowledge Base
 
-Frontend: `http://localhost:5173`  
-Backend: `http://localhost:8000/docs`
+1. **Upload**: Resumes (PDF, DOCX, TXT) are read and extracted.
+2. **Chunking**: Extracted texts are split into overlapping chunks.
+3. **Embedding**: Sentence Transformers index the segments into ChromaDB.
+4. **Retrieval**: When interviewing, matching contexts are fetched by semantic similarity.
+5. **Seeding**: The backend automatically seeds `backend/data/seed/interview_bank.md` to populate standard question sets at first startup.
 
-## RAG Pipeline
+---
 
-1. Upload PDF, DOCX, or TXT.
-2. Backend extracts text with `pypdf`, `python-docx`, or text reader.
-3. Text is chunked with overlap.
-4. Embeddings are generated using Sentence Transformers.
-5. Chunks are stored in ChromaDB with source metadata.
-6. Interview and search routes retrieve relevant context by semantic similarity.
-7. Retrieved context is passed into the LLM prompt.
+## 🌟 Future Enhancements
 
-The backend also seeds `backend/data/seed/interview_bank.md` at startup for company-specific and mode-specific interview content.
-
-## AI Configuration
-
-By default, `LLM_PROVIDER=local` returns deterministic mentor responses so the app works without paid keys. To use OpenAI:
-
-```env
-LLM_PROVIDER=openai
-OPENAI_API_KEY=your-key
-```
-
-## Deployment
-
-1. Build frontend with `npm run build` and host `frontend/dist` on Vercel, Netlify, Cloudflare Pages, or Nginx.
-2. Deploy backend Docker image to Render, Fly.io, Railway, AWS ECS, or GCP Cloud Run.
-3. Use managed PostgreSQL and persistent storage for ChromaDB.
-4. Set `SECRET_KEY`, `DATABASE_URL`, `MONGODB_URI`, `MONGODB_DB`, `OPENAI_API_KEY`, `CORS_ORIGINS`, and `CHROMA_PATH`.
-5. Configure HTTPS and restrict CORS to production frontend domains.
-
-## Notes
-
-Voice and webcam emotion routes are backend-ready signal analyzers. The frontend includes entry controls; production browser capture can be added with the Web Speech API and MediaPipe/face-api.js while sending summarized signals to `/api/voice/analyze` and `/api/emotion/analyze`.
+- 🎤 **Voice-Based Interview Analysis**: Speech-to-text with conversational emotion hooks.
+- 😊 **Webcam Emotion Detection**: Real-time face expression telemetry.
+- 📄 **AI Resume Builder**: Context-aware optimization recommendation systems.
+- 🌍 **Multi-Language Support**: Interactive evaluation in Spanish, French, German, etc.
