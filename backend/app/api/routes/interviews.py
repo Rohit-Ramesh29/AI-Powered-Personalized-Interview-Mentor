@@ -8,10 +8,18 @@ from app.services.interview_engine import first_question, follow_up, new_session
 router = APIRouter(prefix="/interviews", tags=["interviews"])
 
 
+def _get_resume_context(user_email: str) -> dict | None:
+    profile = mongo_repo.get_latest_resume(user_email)
+    if profile and isinstance(profile.get("analysis"), dict):
+        return profile["analysis"]
+    return None
+
+
 @router.post("/start", response_model=InterviewStartOut)
 async def start(payload: InterviewStartIn, user: dict = Depends(current_user)):
     session_id = new_session_id()
-    question = await first_question(payload.mode, payload.company, payload.topics)
+    resume_context = _get_resume_context(user["email"])
+    question = await first_question(payload.mode, payload.company, payload.topics, resume_context)
     history = [{"role": "interviewer", "content": question}]
 
     mongo_repo.insert_interview_session({
@@ -21,6 +29,7 @@ async def start(payload: InterviewStartIn, user: dict = Depends(current_user)):
         "mode": payload.mode,
         "company": payload.company,
         "topics": payload.topics,
+        "resume_context": resume_context,
         "history": history,
     })
     mongo_repo.insert_chat_message({
@@ -38,8 +47,16 @@ async def answer(session_id: str, payload: InterviewAnswerIn, user: dict = Depen
     if not session:
         raise HTTPException(status_code=404, detail="Interview session not found")
 
+    resume_context = session.get("resume_context") or _get_resume_context(user["email"])
     history = list(session.get("history") or []) + [{"role": "candidate", "content": payload.answer}]
-    question, feedback = await follow_up(session["mode"], session["company"], session.get("topics") or [], payload.answer, history)
+    question, feedback = await follow_up(
+        session["mode"],
+        session["company"],
+        session.get("topics") or [],
+        payload.answer,
+        history,
+        resume_context,
+    )
     history.append({"role": "interviewer", "content": question, "feedback": feedback})
 
     mongo_repo.update_interview_history(session_id, history)

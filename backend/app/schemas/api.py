@@ -55,10 +55,40 @@ class InterviewAnswerIn(BaseModel):
     answer: str
 
 
+class ExampleCase(BaseModel):
+    input: str
+    output: str
+    explanation: str = ""
+
+
+class TestCase(BaseModel):
+    input: str
+    expected: str
+
+
+class TestResult(BaseModel):
+    case: int
+    input: str
+    expected: str
+    actual: str
+    passed: bool
+    runtime_ms: float | None = None
+
+
 class CodeEvaluationIn(BaseModel):
     language: str
     code: str
     problem: str
+    test_cases: list[TestCase] = []
+    topic: str = ""
+    question_index: int = -1
+
+
+class QuestionListItem(BaseModel):
+    index: int
+    title: str
+    difficulty: int
+    topic: str
 
 
 class CodingQuestionOut(BaseModel):
@@ -66,4 +96,10 @@ class CodingQuestionOut(BaseModel):
     topic: str
     title: str
     description: str
+    examples: list[ExampleCase] = []
+    constraints: list[str] = []
+    time_complexity: str = ""
+    space_complexity: str = ""
+    test_cases: list[TestCase] = []
     starter_code: str
+    difficulty: int = 0

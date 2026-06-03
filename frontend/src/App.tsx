@@ -1,3 +1,4 @@
+import React from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { Shell } from './components/layout/Shell'
 import { Analytics } from './pages/Analytics'
@@ -9,11 +10,21 @@ import { Landing } from './pages/Landing'
 import { ResumeUpload } from './pages/ResumeUpload'
 import { Settings } from './pages/Settings'
 
+function RequireAuth({ children }: { children: React.ReactElement }) {
+  return localStorage.getItem('token') ? children : <Navigate to="/login" replace />
+}
+
 export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<Auth />} />
-      <Route element={<Shell />}>
+      <Route
+        element={
+          <RequireAuth>
+            <Shell />
+          </RequireAuth>
+        }
+      >
         <Route path="/" element={<Landing />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/resume" element={<ResumeUpload />} />

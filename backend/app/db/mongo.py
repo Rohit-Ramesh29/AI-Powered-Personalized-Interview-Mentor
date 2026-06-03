@@ -70,6 +70,31 @@ class MongoRepository:
     def insert_resume(self, payload: dict[str, Any]) -> None:
         self.db.resume_profiles.insert_one({**payload, "created_at": datetime.now(UTC)})
 
+    def upsert_resume(self, payload: dict[str, Any]) -> None:
+        """Replace the user's existing resume or insert if none exists."""
+        self.db.resume_profiles.replace_one(
+            {"user_email": payload["user_email"]},
+            {**payload, "created_at": datetime.now(UTC)},
+            upsert=True,
+        )
+
+    # ── Coding Completions ────────────────────────────────────────────────────
+
+    def mark_coding_complete(self, user_email: str, topic: str, index: int, title: str) -> None:
+        self.db.completed_coding.update_one(
+            {"user_email": user_email, "topic": topic, "index": index},
+            {"$set": {"title": title, "completed_at": datetime.now(UTC)}},
+            upsert=True,
+        )
+
+    def get_completed_coding(self, user_email: str) -> list[dict[str, Any]]:
+        return [
+            {"topic": d["topic"], "index": d["index"]}
+            for d in self.db.completed_coding.find(
+                {"user_email": user_email}, {"topic": 1, "index": 1, "_id": 0}
+            )
+        ]
+
     def get_latest_resume(self, user_email: str) -> dict[str, Any] | None:
         doc = self.db.resume_profiles.find_one(
             {"user_email": user_email},

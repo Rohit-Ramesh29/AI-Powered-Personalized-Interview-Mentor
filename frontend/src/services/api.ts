@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { Analytics, ChatTurn, CodingQuestion, InterviewMode, ResumeAnalysis } from '../types'
+import type { Analytics, ChatTurn, CodingQuestion, EvaluationResult, InterviewMode, QuestionListItem, ResumeAnalysis, TestCase } from '../types'
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL ?? '/api',
@@ -22,6 +22,10 @@ export async function register(payload: any) {
   const { data } = await api.post('/auth/register', payload)
   localStorage.setItem('token', data.access_token)
   return data
+}
+
+export function logout() {
+  localStorage.removeItem('token')
 }
 
 export async function getProfile() {
@@ -63,13 +67,38 @@ export async function answerInterview(sessionId: string, answer: string) {
   return data as { next_turn: ChatTurn; feedback: ChatTurn['feedback'] }
 }
 
-export async function evaluateCode(payload: { language: string; code: string; problem: string }) {
+export async function evaluateCode(payload: {
+  language: string
+  code: string
+  problem: string
+  test_cases: TestCase[]
+  topic?: string
+  question_index?: number
+}): Promise<EvaluationResult> {
   const { data } = await api.post('/coding/evaluate', payload)
   return data
 }
 
-export async function getCodingQuestion(index: number, language: string): Promise<CodingQuestion> {
-  const { data } = await api.get('/coding/question', { params: { index, language } })
+export async function getCompletedQuestions(): Promise<{ topic: string; index: number }[]> {
+  try {
+    const { data } = await api.get('/coding/completed')
+    return data
+  } catch {
+    return []
+  }
+}
+
+export async function getCodingQuestion(index: number, language: string, concept?: string, company?: string): Promise<CodingQuestion> {
+  const { data } = await api.get('/coding/question', {
+    params: { index, language, ...(concept ? { concept } : {}), ...(company ? { company } : {}) },
+  })
+  return data
+}
+
+export async function getCodingQuestionsList(concept?: string, company?: string): Promise<QuestionListItem[]> {
+  const { data } = await api.get('/coding/questions', {
+    params: { ...(concept ? { concept } : {}), ...(company ? { company } : {}) },
+  })
   return data
 }
 

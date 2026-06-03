@@ -29,7 +29,7 @@ async def analyze(file: UploadFile = File(...), user: dict = Depends(current_use
         chunks,
         [{"source": file.filename, "user_id": user["_id"], "kind": "resume"} for _ in chunks],
     )
-    mongo_repo.insert_resume({
+    mongo_repo.upsert_resume({
         "user_id": user["_id"],
         "user_email": user["email"],
         "filename": file.filename or path.name,
