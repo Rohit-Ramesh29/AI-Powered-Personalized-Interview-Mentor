@@ -2,6 +2,10 @@
 
 A modern full-stack AI SaaS platform that helps users prepare for technical, HR, and system design interviews using adaptive AI-driven mock sessions. The platform analyzes resumes, generates personalized questions, evaluates answers in real time, and provides performance analytics to improve interview readiness.
 
+## Live frontend
+
+The static frontend is published at [GitHub Pages](https://rohit-ramesh29.github.io/AI-Powered-Personalized-Interview-Mentor/). GitHub Pages cannot run the FastAPI backend, so authentication, resume processing, and AI features require `VITE_API_URL` to point to a separately deployed backend.
+
 ---
 
 ## ✨ Features
